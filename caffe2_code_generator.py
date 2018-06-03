@@ -5,9 +5,9 @@ import argparse
 import collections
 from google.protobuf import text_format
 
-class Caffe2CodeGenerator:
-    def __init__(self):
-        fs_
+#class Caffe2CodeGenerator:
+#    def __init__(self):
+#        fs_
 
 class CaffeUtil:
     def __init__(self):
