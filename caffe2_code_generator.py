@@ -5,9 +5,37 @@ import argparse
 import collections
 from google.protobuf import text_format
 
-#class Caffe2CodeGenerator:
-#    def __init__(self):
-#        fs_
+class Caffe2CodeGenerator:
+    def __init__(self, output_folder):
+        self.output_prefix = ""
+        self.fs_code_gen = open(output_folder + '/net.py', 'w')
+
+    def generateNetwork(self, input_output_map ):
+        count = 0
+        self.fs_code_gen.write("from caffe2.python import model_helper,brew")
+        self.fs_code_gen.write("\n \n \n")
+        self.fs_code_gen.write("def addNetwork(model, data):")        
+        for i in range(len(input_output_map)):
+            layer_info = input_output_map[i]
+            print( " --------------------------------------- ")
+            print (layer_info)
+            layer_type = layer_info['layer_type']            
+            inputs = layer_info['input']
+            outputs = layer_info['output']
+            attributes = layer_info['attributes']            
+
+            ## generate the script based on the layer type.
+            if (layer_type == "Convolution"):
+                output_tensor = outputs[0]
+                input_tensor = inputs[0]
+                dilations = attributes['dilations']
+                strides = attributes['strides']
+                pads = attributes['pads']
+                group = attributes['group']
+                kernel_shape = attributes['kernel_shape']
+            
+    def closeFile(self):
+        self.fs_code_gen.close()    
 
 class CaffeUtil:
     def __init__(self):
@@ -79,6 +107,7 @@ class CaffeUtil:
             attribute_map["group"] = groups
             attribute_map["pads"] = [pad_w, pad_h, pad_w, pad_h]
             attribute_map["dilations"] = [dilation_w, dilation_h]
+            attribute_map["num_output"] = num_out
 
         elif (layer_type == "Pooling"):
             pooling = layer_param.pooling_param
@@ -176,8 +205,8 @@ class CaffeUtil:
 
             input_output_map[count] = layer_info
 
-            print ("============= " + str(count) + "============")
-            print (layer_info)
+            #print ("============= " + str(count) + "============")
+            #print (layer_info)
             count += 1
         
         return input_output_map        
@@ -188,6 +217,9 @@ def generate_caffe2_code(filename, output_folder, input_dims):
     input_info = caffe_util.extractInput(input_dims)
     print (input_info)
     input_output_map = caffe_util.extractNetworkInfo(input_info)
+    code_gen = Caffe2CodeGenerator(output_folder)
+    code_gen.generateNetwork(input_output_map)
+    code_gen.closeFile()
 
 def main():
     
